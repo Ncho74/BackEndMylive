@@ -1,14 +1,15 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get,Body,Post, Param, Put, Delete, BadRequestException} from '@nestjs/common';
+import { Controller, Get,Body,Post, Param, Put, Delete,Res, BadRequestException} from '@nestjs/common';
 import { CustomService } from './custom.service';
 import { UpdateCustomTdo } from './tdo/update.custom.tdo';
 import { CreateCustomTdo } from './tdo/create.custom.tdo';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { response, Response } from 'express';
 
 @Controller('custom')
 export class CustomController {
-  constructor(private readonly customService: CustomService,private readonly jwtService:JwtService) {}
+  constructor(private readonly customService: CustomService,private jwtService:JwtService) {}
    @Get()
    async index(){
      return  await this.customService.findAll()
@@ -47,7 +48,9 @@ export class CustomController {
     })
  }
 @Post('login')
-async login(@Body('email') email:string,@Body('pwd') password:string){
+async login(@Body('email') email:string,
+@Body('pwd') password:string,
+@Res({passthrough:true}) response:Response){
   const user=await this.customService.findOne({email})
   if(!user){
     throw new BadRequestException('email ou mot de passe incorrecte !')
@@ -56,7 +59,8 @@ async login(@Body('email') email:string,@Body('pwd') password:string){
       throw new BadRequestException('email ou mot de passe incorrecte !')
   } 
   const jwt=await this.jwtService.signAsync({id:user._id  })
-   return user;
+  response.cookie(jwt,{httpOnly:true})
+   return {success:true,message:"connection effectué avec success"};
   }
 }
 
