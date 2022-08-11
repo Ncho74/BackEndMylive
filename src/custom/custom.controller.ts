@@ -59,7 +59,8 @@ async login(@Body('email') email:string,
       throw new BadRequestException('email ou mot de passe incorrecte !')
   } 
   const jwt=await this.jwtService.signAsync({id:user._id  })
-  response.cookie(jwt,{httpOnly:true})
+  response.cookie('jwt',jwt,{httpOnly:true})
+  response.cookie("email",user.email,{httpOnly:true})
    return {success:true,message:"connection effectué avec success"};
   }
 }
